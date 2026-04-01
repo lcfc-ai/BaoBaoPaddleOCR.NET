@@ -18,7 +18,7 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <None Include="runtimes\**\*.*" Exclude="runtimes\**\*d.dll">
+    <None Include="runtimes\**\*.*" Exclude="runtimes\**\opencv_world*d.dll">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
       <Pack>true</Pack>
       <PackagePath>runtimes\%(RecursiveDir)%(Filename)%(Extension)</PackagePath>

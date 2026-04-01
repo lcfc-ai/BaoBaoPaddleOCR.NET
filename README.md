@@ -2,16 +2,15 @@
 
 `BaoBaoPaddleOCR.NET` 是一个面向 Windows 的 PaddleOCR .NET 封装。
 
-这份说明只讲两件事：
+这份说明重点面向使用者，主要包括：
 
-1. 编译步骤
-2. 使用步骤
+1. 如何编译
+2. 如何通过 NuGet 使用
+3. 如何在代码里调用
 
 ## 编译步骤
 
 ### 1. 编译 `BaoBaoPaddleOCR.dll`
-
-这是最简单的一步。
 
 直接用 Visual Studio 2022 打开 [BaoBaoPaddleOCR.slnx](d:/1.Work/BaoBao/src/BaoBaoPaddleOCR.NET/BaoBaoPaddleOCR.slnx)，然后生成即可。
 
@@ -29,9 +28,7 @@ BaoBaoPaddleOCR\bin\Release\net10.0\BaoBaoPaddleOCR.dll
 
 ### 2. 编译 `BaoBaoPaddleOCR.Native.dll`
 
-如果你要真正运行 OCR，还需要原生层 DLL。
-
-这一步需要先准备：
+如果你要构建真实 OCR 原生层，还需要先准备这些依赖：
 
 - Visual Studio 2022 的 C++ 桌面开发工具
 - CMake
@@ -60,11 +57,9 @@ BaoBaoPaddleOCR\bin\Release\net10.0\BaoBaoPaddleOCR.dll
 BaoBaoPaddleOCR\runtimes\win-x64\native\BaoBaoPaddleOCR.Native.dll
 ```
 
-### 3. 下载模型
+### 3. 手动下载模型
 
-模型不会自动下载。
-
-需要你主动执行：
+如果你是源码方式运行，而不是通过 NuGet 自动准备模型，可以手动执行：
 
 ```powershell
 .\eng\setup-models.ps1 -Force
@@ -78,41 +73,87 @@ models\PP-OCRv5_server_rec_infer
 models\PP-LCNet_x1_0_textline_ori_infer
 ```
 
-## 使用步骤
+## NuGet 使用
 
-### 1. 运行时需要的内容
+### 1. 安装包
 
-如果你是通过 `NuGet` 引用 `BaoBao.PaddleOCR`：
+```powershell
+dotnet add package BaoBao.PaddleOCR
+```
 
-- `runtimes\win-x64\native\` 会跟随包一起进入输出目录
-- `models\` 会在消费者项目首次构建时自动下载到输出目录
+或者在项目文件中引用：
 
-如果你不是通过 `NuGet`，而是手动拷贝文件运行 OCR，那么至少需要这些内容：
+```xml
+<ItemGroup>
+  <PackageReference Include="BaoBao.PaddleOCR" Version="0.1.3" />
+</ItemGroup>
+```
 
-- `BaoBaoPaddleOCR.dll`
-- `runtimes\win-x64\native\` 目录
-- `models\` 目录
+### 2. NuGet 包会自动做什么
 
-### 2. 在 C# 代码中调用
+如果你通过 `NuGet` 使用 `BaoBao.PaddleOCR`：
+
+- native runtimes 会跟随包进入输出目录
+- 模型会在消费者项目首次构建时自动下载到输出目录下的 `models\`
+
+也就是说，普通使用者通常不需要手动拷贝 `runtimes` 和 `models`。
+
+第一次构建如果较慢，通常是在下载模型，这是正常现象。
+
+### 3. 如果不想自动下载模型
+
+可以在消费者项目里关闭：
+
+```xml
+<PropertyGroup>
+  <BaoBaoPaddleOCRAutoDownloadModels>false</BaoBaoPaddleOCRAutoDownloadModels>
+</PropertyGroup>
+```
+
+关闭后需要你自己准备模型目录。
+
+## 代码使用方法
+
+### 1. 最小调用示例
 
 ```csharp
 using BaoBaoPaddleOCR;
 
 using var client = new BaoBaoPaddleOcrClient();
 var result = client.Detect("demo.png");
+
 Console.WriteLine(result.Text);
 ```
 
-### 3. 指定 native 和模型目录
+`Detect` 返回的是 [OcrResult](d:/1.Work/BaoBao/src/BaoBaoPaddleOCR.NET/BaoBaoPaddleOCR/OcrModels.cs)，主要包含：
 
-如果你的目录不是默认结构，可以通过环境变量指定：
+- `Text`：合并后的识别文本
+- `JsonText`：原始 JSON 结果
+- `Blocks`：逐块识别结果
+
+### 2. 指定模型目录和 native 目录
+
+如果你的目录不是默认结构，可以在创建客户端时显式传入：
+
+```csharp
+using BaoBaoPaddleOCR;
+
+using var client = new BaoBaoPaddleOcrClient(
+    modelRoot: @"D:\runtime\models",
+    nativeDir: @"D:\runtime\native");
+
+var result = client.Detect("demo.png");
+Console.WriteLine(result.Text);
+```
+
+也可以通过环境变量指定：
 
 ```powershell
 $env:BAOBAO_PADDLEOCR_NATIVE_DIR = "D:\runtime\native"
 $env:BAOBAO_PADDLEOCR_MODEL_ROOT = "D:\runtime\models"
 ```
 
-### 4. 使用 CLI 验证
+### 3. CLI 验证
 
 ```powershell
 dotnet run --project .\BaoBaoPaddleOCR.Cli\BaoBaoPaddleOCR.Cli.csproj -- .\demo.png --full
@@ -123,19 +164,4 @@ dotnet run --project .\BaoBaoPaddleOCR.Cli\BaoBaoPaddleOCR.Cli.csproj -- .\demo.
 ```powershell
 $env:BAOBAO_PADDLEOCR_MOCK_TEXT = "mock result"
 dotnet run --project .\BaoBaoPaddleOCR.Cli\BaoBaoPaddleOCR.Cli.csproj -- .\demo.png --full
-```
-
-## NuGet 行为
-
-如果使用者引用的是 `BaoBao.PaddleOCR` 这个包：
-
-- native runtimes 会随包自动进入输出目录
-- 模型会在首次构建时自动下载
-
-如果你不希望自动下载模型，可以在消费者项目里关闭：
-
-```xml
-<PropertyGroup>
-  <BaoBaoPaddleOCRAutoDownloadModels>false</BaoBaoPaddleOCRAutoDownloadModels>
-</PropertyGroup>
 ```
