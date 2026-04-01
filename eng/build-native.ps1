@@ -182,11 +182,12 @@ function Copy-DllsFromDirectory {
 }
 
 $scriptDir = Split-Path -Parent $MyInvocation.MyCommand.Path
-$nativeSrcDir = Join-Path $scriptDir "BaoBaoPaddleOCR.Native"
+$repoRoot = Split-Path -Parent $scriptDir
+$nativeSrcDir = Join-Path $repoRoot "BaoBaoPaddleOCR.Native"
 $buildDir = Join-Path $nativeSrcDir "build-$buildDirSuffix"
-$cliBinNativeDir = Join-Path $scriptDir "BaoBaoPaddleOCR.Cli\bin\$Configuration\net10.0\native"
-$runtimeNativeDir = Join-Path $scriptDir "BaoBaoPaddleOCR\runtimes\$TargetArch\native"
-$depsRootDir = Join-Path $scriptDir "deps"
+$cliBinNativeDir = Join-Path $repoRoot "BaoBaoPaddleOCR.Cli\bin\$Configuration\net10.0\native"
+$runtimeNativeDir = Join-Path $repoRoot "BaoBaoPaddleOCR\runtimes\$TargetArch\native"
+$depsRootDir = Join-Path $repoRoot "deps"
 
 $defaultPaddleOcrSrcDir = Join-Path $depsRootDir "PaddleOCR-3.4.0"
 $PaddleOcrSrcDir = Resolve-OptionalPath -Value $PaddleOcrSrcDir -Fallback $defaultPaddleOcrSrcDir

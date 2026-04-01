@@ -27,6 +27,8 @@
 
   <ItemGroup>
     <None Include="..\README.md" Pack="true" PackagePath="\" Link="README.md" />
+    <None Include="buildTransitive\BaoBaoPaddleOCR.targets" Pack="true" PackagePath="buildTransitive\BaoBao.PaddleOCR.targets" />
+    <None Include="buildTransitive\tools\SetupModels.ps1" Pack="true" PackagePath="buildTransitive\tools\SetupModels.ps1" />
   </ItemGroup>
 
 </Project>

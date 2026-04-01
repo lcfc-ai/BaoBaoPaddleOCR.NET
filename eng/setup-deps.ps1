@@ -69,7 +69,8 @@ function Expand-ArchiveToDirectory {
 }
 
 $scriptDir = Split-Path -Parent $MyInvocation.MyCommand.Path
-$depsRootPath = Resolve-TargetPath -Value $DepsRoot -Fallback (Join-Path $scriptDir "deps")
+$repoRoot = Split-Path -Parent $scriptDir
+$depsRootPath = Resolve-TargetPath -Value $DepsRoot -Fallback (Join-Path $repoRoot "deps")
 $downloadDir = Join-Path $depsRootPath ".downloads"
 $paddleOcrSourceUrl = if ([string]::IsNullOrWhiteSpace($PaddleOcrUrl)) {
     "https://github.com/PaddlePaddle/PaddleOCR/archive/refs/tags/v$PaddleOcrVersion.zip"

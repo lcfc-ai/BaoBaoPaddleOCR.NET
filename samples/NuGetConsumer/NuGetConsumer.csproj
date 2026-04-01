@@ -9,8 +9,7 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="BaoBao.PaddleOCR" Version="0.1.0" />
-    <PackageReference Include="BaoBao.PaddleOCR.Models" Version="0.1.0" />
+    <PackageReference Include="BaoBao.PaddleOCR" Version="0.1.1-local" />
   </ItemGroup>
 
 </Project>

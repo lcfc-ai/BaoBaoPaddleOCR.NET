@@ -26,12 +26,12 @@ jobs:
 
       - name: Build native stub
         shell: pwsh
-        run: .\build-native.ps1 -Configuration Release
+        run: .\eng\build-native.ps1 -Configuration Release
 
       - name: Run smoke test
         shell: pwsh
         run: |
           New-Item -ItemType File -Path .\demo.png -Force | Out-Null
           $env:BAOBAO_PADDLEOCR_MOCK_TEXT = "GitHubActionsSmokeTest"
-          .\smoke-test.ps1 -ImagePath .\demo.png
+          dotnet run --project .\BaoBaoPaddleOCR.Cli\BaoBaoPaddleOCR.Cli.csproj -- .\demo.png --model-root .\ --full
 

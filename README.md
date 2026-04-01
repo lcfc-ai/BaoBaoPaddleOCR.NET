@@ -1,248 +1,141 @@
 # BaoBaoPaddleOCR.NET
 
-`BaoBaoPaddleOCR.NET` 是一个基于 PaddleOCR 的本地 OCR 封装，整体调用链路是：
+`BaoBaoPaddleOCR.NET` 是一个面向 Windows 的 PaddleOCR .NET 封装。
 
-- PaddleOCR C++ 推理
-- `BaoBaoPaddleOCR.Native` 提供稳定的 C ABI
-- `BaoBaoPaddleOCR` 通过 `P/Invoke` 暴露给 .NET 使用
+这份说明只讲两件事：
 
-这个仓库现在按“源码 + 脚本”的方式维护：
+1. 编译步骤
+2. 使用步骤
 
-- 你自己的源码保留在仓库里
-- 第三方依赖和模型通过脚本下载到本地
-- 不把大体积二进制和模型直接提交到 Git
+## 编译步骤
 
-## 项目结构
+### 1. 编译 `BaoBaoPaddleOCR.dll`
 
-- `BaoBaoPaddleOCR.Native`：C++ 原生封装层
-- `BaoBaoPaddleOCR`：C# 包装层
-- `BaoBaoPaddleOCR.Models`：模型 NuGet 打包项目
-- `BaoBaoPaddleOCR.Cli`：本地调试和验证用命令行程序
-- `samples/NuGetConsumer`：包消费示例
+这是最简单的一步。
 
-## 适合放到 GitHub 吗
+直接用 Visual Studio 2022 打开 [BaoBaoPaddleOCR.slnx](d:/1.Work/BaoBao/src/BaoBaoPaddleOCR.NET/BaoBaoPaddleOCR.slnx)，然后生成即可。
 
-适合。
+也可以使用命令行：
 
-当前仓库已经按可开源的方向整理过：
+```powershell
+dotnet build .\BaoBaoPaddleOCR.slnx -c Release
+```
 
-- 第三方依赖改成脚本下载
-- 模型目录默认不入库
-- 生成目录默认不入库
-- 可以先跑 stub 版本验证 `C++ -> P/Invoke -> .NET`
-- 需要真实识别时，再准备 `paddle_inference`、OpenCV 和模型
+生成结果：
 
-## 前置要求
+```text
+BaoBaoPaddleOCR\bin\Release\net10.0\BaoBaoPaddleOCR.dll
+```
 
-在 Windows 上构建时，建议准备：
+### 2. 编译 `BaoBaoPaddleOCR.Native.dll`
 
-- Visual Studio 2022，并安装 C++ 桌面开发工具链
-- .NET 10 SDK
+如果你要真正运行 OCR，还需要原生层 DLL。
+
+这一步需要先准备：
+
+- Visual Studio 2022 的 C++ 桌面开发工具
 - CMake
-- OpenCV，默认路径是 `C:\opencv\build`
+- OpenCV
+- `paddle_inference`
+- PaddleOCR C++ 源码
 
-真实 PaddleOCR 原生构建还需要准备：
-
-- `paddle_inference` Windows 目录或压缩包
-
-## 给其他人最简单的使用方式
-
-### 方式 1：先只验证 managed + stub
-
-这条路径最容易成功，适合其他人第一次下载仓库后快速确认环境没有问题。
+先准备依赖：
 
 ```powershell
-dotnet build .\BaoBaoPaddleOCR.slnx -c Release
-.\build-native.ps1 -Configuration Release
+.\eng\setup-deps.ps1 -PaddleInferenceDir "D:\deps\paddle_inference" -Force
 ```
 
-### 方式 2：完整构建真实 PaddleOCR 封装
-
-先准备 `paddle_inference`，然后一键初始化：
+再编译原生层：
 
 ```powershell
-.\bootstrap.ps1 `
-  -PaddleInferenceDir "D:\deps\paddle_inference" `
-  -WithModels
-```
-
-这条命令会自动完成：
-
-- 下载 PaddleOCR 源码到 `deps/`
-- 准备 `deps/paddle_inference`
-- 编译 `.NET`
-- 编译原生封装
-- 下载模型
-
-## 第三方依赖目录约定
-
-脚本会把依赖准备到这些本地目录：
-
-- `deps/PaddleOCR-3.4.0`
-- `deps/paddle_inference`
-- `models/`
-
-默认模型目录结构：
-
-- `models/PP-OCRv5_server_det_infer`
-- `models/PP-OCRv5_server_rec_infer`
-- `models/PP-LCNet_x1_0_textline_ori_infer`
-
-## 手动分步构建
-
-### 1. 准备依赖
-
-如果你本机已经有 `paddle_inference` 目录：
-
-```powershell
-.\setup-deps.ps1 `
-  -PaddleInferenceDir "D:\deps\paddle_inference" `
-  -Force
-```
-
-如果你手里是压缩包：
-
-```powershell
-.\setup-deps.ps1 `
-  -PaddleInferenceArchive "D:\downloads\paddle_inference-win-x64.zip" `
-  -Force
-```
-
-### 2. 编译 .NET
-
-```powershell
-dotnet build .\BaoBaoPaddleOCR.slnx -c Release
-```
-
-### 3. 编译原生 stub
-
-这个模式不接入真实 PaddleOCR，只验证 native 封装链路：
-
-```powershell
-.\build-native.ps1 -Configuration Release
-```
-
-### 4. 编译真实 PaddleOCR 原生封装
-
-```powershell
-.\build-native.ps1 `
+.\eng\build-native.ps1 `
   -Configuration Release `
   -WithPaddleOcr `
   -PaddleInferenceDir .\deps\paddle_inference
 ```
 
-### 5. 下载模型
+生成结果会复制到：
 
-```powershell
-.\setup-models.ps1 -Force
+```text
+BaoBaoPaddleOCR\runtimes\win-x64\native\BaoBaoPaddleOCR.Native.dll
 ```
 
-## 运行验证
+### 3. 下载模型
 
-### Mock 模式
+模型不会自动下载。
+
+需要你主动执行：
+
+```powershell
+.\eng\setup-models.ps1 -Force
+```
+
+默认模型目录：
+
+```text
+models\PP-OCRv5_server_det_infer
+models\PP-OCRv5_server_rec_infer
+models\PP-LCNet_x1_0_textline_ori_infer
+```
+
+## 使用步骤
+
+### 1. 运行时需要的内容
+
+如果你是通过 `NuGet` 引用 `BaoBao.PaddleOCR`：
+
+- `runtimes\win-x64\native\` 会跟随包一起进入输出目录
+- `models\` 会在消费者项目首次构建时自动下载到输出目录
+
+如果你不是通过 `NuGet`，而是手动拷贝文件运行 OCR，那么至少需要这些内容：
+
+- `BaoBaoPaddleOCR.dll`
+- `runtimes\win-x64\native\` 目录
+- `models\` 目录
+
+### 2. 在 C# 代码中调用
+
+```csharp
+using BaoBaoPaddleOCR;
+
+using var client = new BaoBaoPaddleOcrClient();
+var result = client.Detect("demo.png");
+Console.WriteLine(result.Text);
+```
+
+### 3. 指定 native 和模型目录
+
+如果你的目录不是默认结构，可以通过环境变量指定：
+
+```powershell
+$env:BAOBAO_PADDLEOCR_NATIVE_DIR = "D:\runtime\native"
+$env:BAOBAO_PADDLEOCR_MODEL_ROOT = "D:\runtime\models"
+```
+
+### 4. 使用 CLI 验证
+
+```powershell
+dotnet run --project .\BaoBaoPaddleOCR.Cli\BaoBaoPaddleOCR.Cli.csproj -- .\demo.png --full
+```
+
+如果只是验证调用链路，不跑真实 OCR，可以用 mock：
 
 ```powershell
 $env:BAOBAO_PADDLEOCR_MOCK_TEXT = "mock result"
 dotnet run --project .\BaoBaoPaddleOCR.Cli\BaoBaoPaddleOCR.Cli.csproj -- .\demo.png --full
 ```
 
-### 真实识别模式
+## NuGet 行为
 
-```powershell
-dotnet run --project .\BaoBaoPaddleOCR.Cli\BaoBaoPaddleOCR.Cli.csproj -c Release -- `
-  .\deps\PaddleOCR-3.4.0\test_tipc\web\test.jpg `
-  --model-root .\models `
-  --native-dir .\BaoBaoPaddleOCR\runtimes\win-x64\native
-```
+如果使用者引用的是 `BaoBao.PaddleOCR` 这个包：
 
-## Visual Studio 的简单用法
+- native runtimes 会随包自动进入输出目录
+- 模型会在首次构建时自动下载
 
-如果你装了 Visual Studio，推荐这样用：
+如果你不希望自动下载模型，可以在消费者项目里关闭：
 
-1. 第一次先执行一次 `bootstrap.ps1`
-2. 然后打开 `BaoBaoPaddleOCR.slnx`
-3. 日常修改 `.NET` 代码时，直接在 VS 里生成
-4. 只有改了 C++ 原生层，才重新跑一次 `build-native.ps1`
-
-也就是说，命令行主要集中在“首次准备环境”和“重编原生层”这两件事上。
-
-## 打 NuGet 包
-
-```powershell
-.\pack-nuget.ps1 `
-  -Version 0.1.0 `
-  -Configuration Release `
-  -BuildNative `
-  -WithPaddleOcr `
-  -WithModels `
-  -PaddleInferenceDir .\deps\paddle_inference
-```
-
-默认输出目录：
-
-```text
-artifacts/nuget/
-```
-
-会生成两个包：
-
-- `BaoBao.PaddleOCR`
-- `BaoBao.PaddleOCR.Models`
-
-## 发布到本地 NuGet 源
-
-```powershell
-.\publish-local-feed.ps1
-```
-
-## 发布到 NuGet.org
-
-```powershell
-.\publish-nugetorg.ps1 `
-  -ApiKey "<your-nuget-api-key>" `
-  -SkipDuplicate
-```
-
-## 运行时环境变量
-
-- `BAOBAO_PADDLEOCR_NATIVE_DIR`
-- `BAOBAO_PADDLEOCR_MODEL_ROOT`
-- `BAOBAO_PADDLEOCR_MOCK_TEXT`
-- `BAOBAO_PADDLEOCR_CPU_THREADS`
-- `BAOBAO_PADDLEOCR_ENABLE_MKLDNN`
-
-## 推荐的 GitHub 开源姿势
-
-如果你准备把它单独放到 GitHub：
-
-1. 把 `src/BaoBaoPaddleOCR.NET` 单独作为一个新仓库根目录
-2. 保留当前的 `README.md`、`.gitignore`、`LICENSE`、`.github/workflows`
-3. 不提交 `deps/`、`models/`、`artifacts/`、`build-*` 这些本地产物
-4. 在 Release 页面可以额外上传编译好的 NuGet 包或运行时压缩包
-
-这样别人下载后，至少可以先完成 stub 构建；需要真实 PaddleOCR 时，再按 README 准备完整依赖。
-
-## 从当前大仓库导出为独立 GitHub 仓库
-
-如果这个目录当前还在一个更大的 Git 仓库里，最简单的办法不是直接在原地再初始化 Git，而是导出一个干净副本：
-
-```powershell
-.\export-standalone-repo.ps1 `
-  -DestinationDir "D:\1.Work\BaoBaoPaddleOCR.NET.GitHub" `
-  -RemoteUrl "https://github.com/lcfc-ai/BaoBaoPaddleOCR.NET.git"
-```
-
-这个脚本会：
-
-- 复制当前项目源码到一个新的独立目录
-- 自动排除 `deps/`、`models/`、`artifacts/`、`bin/`、`obj/`、`build-*` 这些不该入库的内容
-- 在新目录里初始化独立 Git 仓库
-- 自动配置 `origin`
-
-然后你只需要在导出的目录里执行：
-
-```powershell
-git add .
-git commit -m "Initial import"
-git push -u origin main
+```xml
+<PropertyGroup>
+  <BaoBaoPaddleOCRAutoDownloadModels>false</BaoBaoPaddleOCRAutoDownloadModels>
+</PropertyGroup>
 ```

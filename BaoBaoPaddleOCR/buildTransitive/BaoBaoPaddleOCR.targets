@@ -1,19 +1,17 @@
 <Project>
   <PropertyGroup>
-    <BaoBaoPaddleOCRCopyModels Condition="'$(BaoBaoPaddleOCRCopyModels)' == ''">true</BaoBaoPaddleOCRCopyModels>
-    <BaoBaoPaddleOCRModelSourceDir>$(MSBuildThisFileDirectory)..\contentFiles\any\any\models\</BaoBaoPaddleOCRModelSourceDir>
-    <BaoBaoPaddleOCRModelTargetDir>$(TargetDir)models\</BaoBaoPaddleOCRModelTargetDir>
+    <BaoBaoPaddleOCRAutoDownloadModels Condition="'$(BaoBaoPaddleOCRAutoDownloadModels)' == ''">true</BaoBaoPaddleOCRAutoDownloadModels>
+    <BaoBaoPaddleOCRModelTargetDir Condition="'$(BaoBaoPaddleOCRModelTargetDir)' == ''">$(TargetDir)models</BaoBaoPaddleOCRModelTargetDir>
+    <BaoBaoPaddleOCRModelSetupScript>$(MSBuildThisFileDirectory)tools\SetupModels.ps1</BaoBaoPaddleOCRModelSetupScript>
+    <BaoBaoPaddleOCRModelReadyMarker>$(BaoBaoPaddleOCRModelTargetDir)\PP-OCRv5_server_rec_infer\inference.json</BaoBaoPaddleOCRModelReadyMarker>
   </PropertyGroup>
 
-  <ItemGroup Condition="'$(BaoBaoPaddleOCRCopyModels)' == 'true' and Exists('$(BaoBaoPaddleOCRModelSourceDir)')">
-    <BaoBaoPaddleOCRModelFiles Include="$(BaoBaoPaddleOCRModelSourceDir)**\*.*" />
-  </ItemGroup>
-
-  <Target Name="BaoBaoPaddleOCR_CopyModels" AfterTargets="Build" Condition="'$(BaoBaoPaddleOCRCopyModels)' == 'true' and '@(BaoBaoPaddleOCRModelFiles)' != ''">
-    <MakeDir Directories="$(BaoBaoPaddleOCRModelTargetDir)" />
-    <Copy
-      SourceFiles="@(BaoBaoPaddleOCRModelFiles)"
-      DestinationFiles="@(BaoBaoPaddleOCRModelFiles->'$(BaoBaoPaddleOCRModelTargetDir)%(RecursiveDir)%(Filename)%(Extension)')"
-      SkipUnchangedFiles="true" />
+  <Target
+    Name="BaoBaoPaddleOCR_AutoDownloadModels"
+    AfterTargets="Build"
+    Condition="'$(BaoBaoPaddleOCRAutoDownloadModels)' == 'true' and '$(OS)' == 'Windows_NT' and Exists('$(BaoBaoPaddleOCRModelSetupScript)') and !Exists('$(BaoBaoPaddleOCRModelReadyMarker)')">
+    <Exec
+      Command="powershell -NoProfile -ExecutionPolicy Bypass -File &quot;$(BaoBaoPaddleOCRModelSetupScript)&quot; -ModelRoot &quot;$(BaoBaoPaddleOCRModelTargetDir)&quot;"
+      WorkingDirectory="$(MSBuildProjectDirectory)" />
   </Target>
 </Project>
