@@ -1,0 +1,43 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net10.0</TargetFramework>
+    <NoBuild>true</NoBuild>
+    <IncludeBuildOutput>false</IncludeBuildOutput>
+    <GeneratePackageOnBuild>false</GeneratePackageOnBuild>
+    <PackageId>BaoBao.PaddleOCR.Models</PackageId>
+    <Version>0.1.0</Version>
+    <Authors>BaoBao</Authors>
+    <Company>BaoBao</Company>
+    <Description>BaoBao PaddleOCR model package for PP-OCRv5 server OCR.</Description>
+    <PackageLicenseExpression>MIT</PackageLicenseExpression>
+    <PackageReadmeFile>README.md</PackageReadmeFile>
+    <PackageTags>ocr;paddleocr;models</PackageTags>
+    <IncludeSymbols>false</IncludeSymbols>
+    <NoWarn>$(NoWarn);NU5128</NoWarn>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <None Include="..\README.md" Pack="true" PackagePath="\" Link="README.md" />
+    <None Include="buildTransitive\BaoBaoPaddleOCR.Models.targets" Pack="true" PackagePath="buildTransitive\BaoBao.PaddleOCR.Models.targets" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Content Include="..\models\PP-OCRv5_server_det_infer\**\*.*" Condition="Exists('..\models\PP-OCRv5_server_det_infer')">
+      <Pack>true</Pack>
+      <PackagePath>contentFiles\any\any\models\PP-OCRv5_server_det_infer\%(RecursiveDir)%(Filename)%(Extension)</PackagePath>
+      <PackageCopyToOutput>false</PackageCopyToOutput>
+    </Content>
+    <Content Include="..\models\PP-OCRv5_server_rec_infer\**\*.*" Condition="Exists('..\models\PP-OCRv5_server_rec_infer')">
+      <Pack>true</Pack>
+      <PackagePath>contentFiles\any\any\models\PP-OCRv5_server_rec_infer\%(RecursiveDir)%(Filename)%(Extension)</PackagePath>
+      <PackageCopyToOutput>false</PackageCopyToOutput>
+    </Content>
+    <Content Include="..\models\PP-LCNet_x1_0_textline_ori_infer\**\*.*" Condition="Exists('..\models\PP-LCNet_x1_0_textline_ori_infer')">
+      <Pack>true</Pack>
+      <PackagePath>contentFiles\any\any\models\PP-LCNet_x1_0_textline_ori_infer\%(RecursiveDir)%(Filename)%(Extension)</PackagePath>
+      <PackageCopyToOutput>false</PackageCopyToOutput>
+    </Content>
+  </ItemGroup>
+
+</Project>

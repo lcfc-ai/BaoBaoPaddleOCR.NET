@@ -1,0 +1,29 @@
+# Build outputs
+bin/
+obj/
+artifacts/
+publish/
+
+# Native build directories
+BaoBaoPaddleOCR.Native/build/
+BaoBaoPaddleOCR.Native/build-*/
+BaoBaoPaddleOCR/runtimes/win-x64/native/
+
+# Local dependencies and models
+deps/
+models/
+.model-downloads/
+
+# Visual Studio
+.vs/
+*.user
+*.suo
+*.sln.docstates
+
+# NuGet packages
+*.nupkg
+*.snupkg
+
+# Logs
+*.log
+

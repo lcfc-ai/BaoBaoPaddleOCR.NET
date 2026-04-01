@@ -1,0 +1,32 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net10.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+    <GeneratePackageOnBuild>false</GeneratePackageOnBuild>
+    <PackageId>BaoBao.PaddleOCR</PackageId>
+    <Version>0.1.0</Version>
+    <Authors>BaoBao</Authors>
+    <Company>BaoBao</Company>
+    <Description>BaoBao PaddleOCR wrapper with native runtime assets for win-x64.</Description>
+    <PackageLicenseExpression>MIT</PackageLicenseExpression>
+    <PackageReadmeFile>README.md</PackageReadmeFile>
+    <PackageTags>ocr;paddleocr;native;win-x64</PackageTags>
+    <IncludeSymbols>false</IncludeSymbols>
+    <NoWarn>$(NoWarn);NU5128</NoWarn>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <None Include="runtimes\**\*.*" Exclude="runtimes\**\*d.dll">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      <Pack>true</Pack>
+      <PackagePath>runtimes\%(RecursiveDir)%(Filename)%(Extension)</PackagePath>
+    </None>
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Include="..\README.md" Pack="true" PackagePath="\" Link="README.md" />
+  </ItemGroup>
+
+</Project>

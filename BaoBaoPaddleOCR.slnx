@@ -1,0 +1,4 @@
+<Solution>
+  <Project Path="BaoBaoPaddleOCR.Cli/BaoBaoPaddleOCR.Cli.csproj" />
+  <Project Path="BaoBaoPaddleOCR/BaoBaoPaddleOCR.csproj" />
+</Solution>

@@ -1,0 +1,19 @@
+<Project>
+  <PropertyGroup>
+    <BaoBaoPaddleOCRCopyModels Condition="'$(BaoBaoPaddleOCRCopyModels)' == ''">true</BaoBaoPaddleOCRCopyModels>
+    <BaoBaoPaddleOCRModelSourceDir>$(MSBuildThisFileDirectory)..\contentFiles\any\any\models\</BaoBaoPaddleOCRModelSourceDir>
+    <BaoBaoPaddleOCRModelTargetDir>$(TargetDir)models\</BaoBaoPaddleOCRModelTargetDir>
+  </PropertyGroup>
+
+  <ItemGroup Condition="'$(BaoBaoPaddleOCRCopyModels)' == 'true' and Exists('$(BaoBaoPaddleOCRModelSourceDir)')">
+    <BaoBaoPaddleOCRModelFiles Include="$(BaoBaoPaddleOCRModelSourceDir)**\*.*" />
+  </ItemGroup>
+
+  <Target Name="BaoBaoPaddleOCR_CopyModels" AfterTargets="Build" Condition="'$(BaoBaoPaddleOCRCopyModels)' == 'true' and '@(BaoBaoPaddleOCRModelFiles)' != ''">
+    <MakeDir Directories="$(BaoBaoPaddleOCRModelTargetDir)" />
+    <Copy
+      SourceFiles="@(BaoBaoPaddleOCRModelFiles)"
+      DestinationFiles="@(BaoBaoPaddleOCRModelFiles->'$(BaoBaoPaddleOCRModelTargetDir)%(RecursiveDir)%(Filename)%(Extension)')"
+      SkipUnchangedFiles="true" />
+  </Target>
+</Project>

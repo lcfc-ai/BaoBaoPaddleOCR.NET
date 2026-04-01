@@ -1,0 +1,37 @@
+name: ci
+
+on:
+  push:
+    branches:
+      - main
+      - master
+  pull_request:
+
+jobs:
+  build:
+    runs-on: windows-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: 10.0.x
+
+      - name: Build managed projects
+        shell: pwsh
+        run: dotnet build .\BaoBaoPaddleOCR.slnx -c Release
+
+      - name: Build native stub
+        shell: pwsh
+        run: .\build-native.ps1 -Configuration Release
+
+      - name: Run smoke test
+        shell: pwsh
+        run: |
+          New-Item -ItemType File -Path .\demo.png -Force | Out-Null
+          $env:BAOBAO_PADDLEOCR_MOCK_TEXT = "GitHubActionsSmokeTest"
+          .\smoke-test.ps1 -ImagePath .\demo.png
+
