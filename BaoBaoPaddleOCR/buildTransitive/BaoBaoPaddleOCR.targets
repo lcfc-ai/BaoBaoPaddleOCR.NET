@@ -3,7 +3,7 @@
     <BaoBaoPaddleOCRAutoDownloadModels Condition="'$(BaoBaoPaddleOCRAutoDownloadModels)' == ''">true</BaoBaoPaddleOCRAutoDownloadModels>
     <BaoBaoPaddleOCRModelTargetDir Condition="'$(BaoBaoPaddleOCRModelTargetDir)' == ''">$(TargetDir)models</BaoBaoPaddleOCRModelTargetDir>
     <BaoBaoPaddleOCRModelSetupScript>$(MSBuildThisFileDirectory)tools\SetupModels.ps1</BaoBaoPaddleOCRModelSetupScript>
-    <BaoBaoPaddleOCRModelReadyMarker>$(BaoBaoPaddleOCRModelTargetDir)\PP-OCRv5_server_rec_infer\inference.json</BaoBaoPaddleOCRModelReadyMarker>
+    <BaoBaoPaddleOCRModelReadyMarker>$(BaoBaoPaddleOCRModelTargetDir)\PP-OCRv5_mobile_rec_infer\inference.json</BaoBaoPaddleOCRModelReadyMarker>
   </PropertyGroup>
 
   <Target

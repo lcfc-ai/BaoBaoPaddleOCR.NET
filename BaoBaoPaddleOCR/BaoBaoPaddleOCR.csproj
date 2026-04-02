@@ -6,7 +6,7 @@
     <Nullable>enable</Nullable>
     <GeneratePackageOnBuild>false</GeneratePackageOnBuild>
     <PackageId>BaoBaoPaddleOCR.Net</PackageId>
-    <Version>0.1.0</Version>
+    <Version>0.1.4</Version>
     <Authors>BaoBao</Authors>
     <Company>BaoBao</Company>
     <Description>BaoBao PaddleOCR wrapper with native runtime assets for win-x64.</Description>

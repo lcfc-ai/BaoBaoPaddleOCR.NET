@@ -12,9 +12,23 @@ extern "C" {
 
 typedef void* BaoBaoPaddleOcrHandle;
 
+typedef struct BaoBaoPaddleOcrCreateOptions {
+  int struct_size;
+  int enable_gpu;
+  int gpu_device_id;
+  int enable_mkldnn;
+  int cpu_threads;
+} BaoBaoPaddleOcrCreateOptions;
+
 BAOBAO_API int BaoBaoPaddleOcr_Create(const char* model_root,
                                       BaoBaoPaddleOcrHandle* out_handle,
                                       char** error_message);
+
+BAOBAO_API int BaoBaoPaddleOcr_CreateWithOptions(
+    const char* model_root,
+    const BaoBaoPaddleOcrCreateOptions* options,
+    BaoBaoPaddleOcrHandle* out_handle,
+    char** error_message);
 
 BAOBAO_API int BaoBaoPaddleOcr_Detect(BaoBaoPaddleOcrHandle handle,
                                       const char* image_path,

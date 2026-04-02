@@ -18,6 +18,12 @@ add_library(BaoBaoPaddleOCR.Native SHARED
     src/baobao_paddleocr.cpp
 )
 
+if (BAOBAO_WITH_GPU)
+    set_target_properties(BaoBaoPaddleOCR.Native PROPERTIES OUTPUT_NAME "BaoBaoPaddleOCR.Native.Gpu")
+else()
+    set_target_properties(BaoBaoPaddleOCR.Native PROPERTIES OUTPUT_NAME "BaoBaoPaddleOCR.Native.Cpu")
+endif()
+
 target_include_directories(BaoBaoPaddleOCR.Native
     PUBLIC
         ${CMAKE_CURRENT_SOURCE_DIR}/include

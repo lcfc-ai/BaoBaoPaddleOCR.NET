@@ -203,6 +203,7 @@ $CudnnLibDir = Resolve-OptionalPath -Value $CudnnLibDir -Fallback $env:BAOBAO_CU
 
 $withPaddleValue = if ($WithPaddleOcr.IsPresent) { "ON" } else { "OFF" }
 $withGpuValue = if ($WithGpu.IsPresent) { "ON" } else { "OFF" }
+$nativeDllName = if ($WithGpu.IsPresent) { "BaoBaoPaddleOCR.Native.Gpu.dll" } else { "BaoBaoPaddleOCR.Native.Cpu.dll" }
 
 $cmakeArgs = @(
     "-S", $nativeSrcDir,
@@ -269,20 +270,23 @@ Write-Host "==> Configuring CMake (BAOBAO_WITH_PADDLEOCR=$withPaddleValue, BAOBA
 Write-Host "==> Building native library ($Configuration)"
 & $cmakeCommand --build $buildDir --config $Configuration | Out-Host
 
-$dllPath = Join-Path $buildDir "$Configuration\BaoBaoPaddleOCR.Native.dll"
+$dllPath = Join-Path $buildDir "$Configuration\$nativeDllName"
 if (-not (Test-Path $dllPath)) {
-    $dllPath = Join-Path $buildDir "BaoBaoPaddleOCR.Native.dll"
+    $dllPath = Join-Path $buildDir $nativeDllName
 }
 
 if (-not (Test-Path $dllPath)) {
-    throw "Cannot find BaoBaoPaddleOCR.Native.dll. Please check CMake build output."
+    throw "Cannot find $nativeDllName. Please check CMake build output."
 }
 
 New-Item -ItemType Directory -Path $cliBinNativeDir -Force | Out-Null
 New-Item -ItemType Directory -Path $runtimeNativeDir -Force | Out-Null
 
-Copy-Item -Path $dllPath -Destination (Join-Path $cliBinNativeDir "BaoBaoPaddleOCR.Native.dll") -Force
-Copy-Item -Path $dllPath -Destination (Join-Path $runtimeNativeDir "BaoBaoPaddleOCR.Native.dll") -Force
+Remove-Item -LiteralPath (Join-Path $cliBinNativeDir "BaoBaoPaddleOCR.Native.dll") -Force -ErrorAction SilentlyContinue
+Remove-Item -LiteralPath (Join-Path $runtimeNativeDir "BaoBaoPaddleOCR.Native.dll") -Force -ErrorAction SilentlyContinue
+
+Copy-Item -Path $dllPath -Destination (Join-Path $cliBinNativeDir $nativeDllName) -Force
+Copy-Item -Path $dllPath -Destination (Join-Path $runtimeNativeDir $nativeDllName) -Force
 
 if ($WithPaddleOcr.IsPresent) {
     $dependencyDirs = @(

@@ -28,6 +28,13 @@ struct OcrEngine {
 #endif
 };
 
+struct RuntimeOptions {
+  bool enable_gpu = false;
+  int gpu_device_id = 0;
+  bool enable_mkldnn = true;
+  int cpu_threads = 8;
+};
+
 std::string JsonEscape(const std::string& input) {
   std::string out;
   out.reserve(input.size() + 8);
@@ -249,16 +256,88 @@ std::string BuildRealJson(const OCRPipelineResult& result) {
   return json.str();
 }
 
-std::unique_ptr<_OCRPipeline> CreatePipeline(const std::filesystem::path& model_root) {
+std::string InferModelNameFromDirectory(const std::filesystem::path& model_dir,
+                                        std::string_view model_kind) {
+  const auto dir_name = model_dir.filename().string();
+
+  if (dir_name.find("PP-OCRv5_mobile_") != std::string::npos) {
+    return std::string("PP-OCRv5_mobile_") + std::string(model_kind);
+  }
+
+  if (dir_name.find("PP-OCRv5_server_") != std::string::npos) {
+    return std::string("PP-OCRv5_server_") + std::string(model_kind);
+  }
+
+  if (dir_name.find("PP-OCRv4_mobile_") != std::string::npos) {
+    return std::string("PP-OCRv4_mobile_") + std::string(model_kind);
+  }
+
+  if (dir_name.find("PP-OCRv4_server_") != std::string::npos) {
+    return std::string("PP-OCRv4_server_") + std::string(model_kind);
+  }
+
+  return {};
+}
+
+RuntimeOptions GetRuntimeOptions(const BaoBaoPaddleOcrCreateOptions* options) {
+  RuntimeOptions runtime_options;
+  runtime_options.enable_mkldnn = GetEnvBool("BAOBAO_PADDLEOCR_ENABLE_MKLDNN", true);
+  runtime_options.cpu_threads = GetEnvInt("BAOBAO_PADDLEOCR_CPU_THREADS", 8);
+
+  const auto device_from_env = Trim(std::getenv("BAOBAO_PADDLEOCR_DEVICE") == nullptr
+                                        ? ""
+                                        : std::getenv("BAOBAO_PADDLEOCR_DEVICE"));
+  if (!device_from_env.empty()) {
+    auto value = device_from_env;
+    std::transform(value.begin(), value.end(), value.begin(),
+                   [](unsigned char ch) { return static_cast<char>(std::tolower(ch)); });
+    if (value == "gpu" || value.rfind("gpu:", 0) == 0) {
+      runtime_options.enable_gpu = true;
+      const auto colon_pos = value.find(':');
+      if (colon_pos != std::string::npos) {
+        try {
+          runtime_options.gpu_device_id = std::stoi(value.substr(colon_pos + 1));
+        } catch (...) {
+          runtime_options.gpu_device_id = 0;
+        }
+      }
+    }
+  }
+
+  if (options == nullptr) {
+    return runtime_options;
+  }
+
+  if (options->enable_gpu >= 0) {
+    runtime_options.enable_gpu = options->enable_gpu != 0;
+  }
+
+  if (options->gpu_device_id >= 0) {
+    runtime_options.gpu_device_id = options->gpu_device_id;
+  }
+
+  if (options->enable_mkldnn >= 0) {
+    runtime_options.enable_mkldnn = options->enable_mkldnn != 0;
+  }
+
+  if (options->cpu_threads > 0) {
+    runtime_options.cpu_threads = options->cpu_threads;
+  }
+
+  return runtime_options;
+}
+
+std::unique_ptr<_OCRPipeline> CreatePipeline(const std::filesystem::path& model_root,
+                                             const RuntimeOptions& runtime_options) {
   const auto det_dir =
       ResolveChildDirectory(model_root, "BAOBAO_PADDLEOCR_DET_DIRNAME",
-                            {"PP-OCRv5_server_det_infer", "det", "text_detection",
-                             "TextDetection"},
+                            {"PP-OCRv5_mobile_det_infer", "PP-OCRv5_server_det_infer",
+                             "det", "text_detection", "TextDetection"},
                             true);
   const auto rec_dir =
       ResolveChildDirectory(model_root, "BAOBAO_PADDLEOCR_REC_DIRNAME",
-                            {"PP-OCRv5_server_rec_infer", "rec", "text_recognition",
-                             "TextRecognition"},
+                            {"PP-OCRv5_mobile_rec_infer", "PP-OCRv5_server_rec_infer",
+                             "rec", "text_recognition", "TextRecognition"},
                             true);
   const auto cls_dir =
       ResolveChildDirectory(model_root, "BAOBAO_PADDLEOCR_CLS_DIRNAME",
@@ -268,16 +347,20 @@ std::unique_ptr<_OCRPipeline> CreatePipeline(const std::filesystem::path& model_
 
   OCRPipelineParams params;
   params.text_detection_model_dir = det_dir.string();
+  params.text_detection_model_name = InferModelNameFromDirectory(det_dir, "det");
   params.text_recognition_model_dir = rec_dir.string();
+  params.text_recognition_model_name = InferModelNameFromDirectory(rec_dir, "rec");
   params.use_doc_orientation_classify = false;
   params.use_doc_unwarping = false;
   params.use_textline_orientation = !cls_dir.empty();
   if (!cls_dir.empty()) {
     params.textline_orientation_model_dir = cls_dir.string();
   }
-  params.device = "cpu";
-  params.enable_mkldnn = GetEnvBool("BAOBAO_PADDLEOCR_ENABLE_MKLDNN", true);
-  params.cpu_threads = GetEnvInt("BAOBAO_PADDLEOCR_CPU_THREADS", 8);
+  params.device = runtime_options.enable_gpu
+                      ? "gpu:" + std::to_string(runtime_options.gpu_device_id)
+                      : "cpu";
+  params.enable_mkldnn = runtime_options.enable_mkldnn;
+  params.cpu_threads = runtime_options.cpu_threads;
   params.precision = "fp32";
   params.thread_num = 1;
 
@@ -290,6 +373,14 @@ std::unique_ptr<_OCRPipeline> CreatePipeline(const std::filesystem::path& model_
 int BaoBaoPaddleOcr_Create(const char* model_root,
                            BaoBaoPaddleOcrHandle* out_handle,
                            char** error_message) {
+  return BaoBaoPaddleOcr_CreateWithOptions(model_root, nullptr, out_handle,
+                                           error_message);
+}
+
+int BaoBaoPaddleOcr_CreateWithOptions(const char* model_root,
+                                      const BaoBaoPaddleOcrCreateOptions* options,
+                                      BaoBaoPaddleOcrHandle* out_handle,
+                                      char** error_message) {
   if (out_handle == nullptr) {
     SetMessage(error_message, "out_handle is null.");
     return 1001;
@@ -310,7 +401,7 @@ int BaoBaoPaddleOcr_Create(const char* model_root,
   try {
     auto engine = std::make_unique<OcrEngine>(root.string());
 #if BAOBAO_WITH_PADDLEOCR
-    engine->pipeline = CreatePipeline(root);
+    engine->pipeline = CreatePipeline(root, GetRuntimeOptions(options));
 #endif
     *out_handle = reinterpret_cast<BaoBaoPaddleOcrHandle>(engine.release());
     return 0;

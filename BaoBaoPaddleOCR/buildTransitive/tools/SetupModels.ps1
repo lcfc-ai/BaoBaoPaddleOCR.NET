@@ -57,12 +57,12 @@ New-Item -ItemType Directory -Path $downloadDir -Force | Out-Null
 
 $models = @(
     @{
-        Name = "PP-OCRv5_server_det_infer"
-        Url = "https://paddle-model-ecology.bj.bcebos.com/paddlex/official_inference_model/paddle3.0.0/PP-OCRv5_server_det_infer.tar"
+        Name = "PP-OCRv5_mobile_det_infer"
+        Url = "https://paddle-model-ecology.bj.bcebos.com/paddlex/official_inference_model/paddle3.0.0/PP-OCRv5_mobile_det_infer.tar"
     },
     @{
-        Name = "PP-OCRv5_server_rec_infer"
-        Url = "https://paddle-model-ecology.bj.bcebos.com/paddlex/official_inference_model/paddle3.0.0/PP-OCRv5_server_rec_infer.tar"
+        Name = "PP-OCRv5_mobile_rec_infer"
+        Url = "https://paddle-model-ecology.bj.bcebos.com/paddlex/official_inference_model/paddle3.0.0/PP-OCRv5_mobile_rec_infer.tar"
     },
     @{
         Name = "PP-LCNet_x1_0_textline_ori_infer"

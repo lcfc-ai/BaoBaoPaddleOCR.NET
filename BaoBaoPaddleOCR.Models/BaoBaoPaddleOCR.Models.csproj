@@ -9,7 +9,7 @@
     <Version>0.1.0</Version>
     <Authors>BaoBao</Authors>
     <Company>BaoBao</Company>
-    <Description>BaoBao PaddleOCR model package for PP-OCRv5 server OCR.</Description>
+    <Description>BaoBao PaddleOCR model package for PP-OCRv5 mobile OCR.</Description>
     <PackageLicenseExpression>MIT</PackageLicenseExpression>
     <PackageReadmeFile>README.md</PackageReadmeFile>
     <PackageTags>ocr;paddleocr;models</PackageTags>
@@ -23,14 +23,14 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Content Include="..\models\PP-OCRv5_server_det_infer\**\*.*" Condition="Exists('..\models\PP-OCRv5_server_det_infer')">
+    <Content Include="..\models\PP-OCRv5_mobile_det_infer\**\*.*" Condition="Exists('..\models\PP-OCRv5_mobile_det_infer')">
       <Pack>true</Pack>
-      <PackagePath>contentFiles\any\any\models\PP-OCRv5_server_det_infer\%(RecursiveDir)%(Filename)%(Extension)</PackagePath>
+      <PackagePath>contentFiles\any\any\models\PP-OCRv5_mobile_det_infer\%(RecursiveDir)%(Filename)%(Extension)</PackagePath>
       <PackageCopyToOutput>false</PackageCopyToOutput>
     </Content>
-    <Content Include="..\models\PP-OCRv5_server_rec_infer\**\*.*" Condition="Exists('..\models\PP-OCRv5_server_rec_infer')">
+    <Content Include="..\models\PP-OCRv5_mobile_rec_infer\**\*.*" Condition="Exists('..\models\PP-OCRv5_mobile_rec_infer')">
       <Pack>true</Pack>
-      <PackagePath>contentFiles\any\any\models\PP-OCRv5_server_rec_infer\%(RecursiveDir)%(Filename)%(Extension)</PackagePath>
+      <PackagePath>contentFiles\any\any\models\PP-OCRv5_mobile_rec_infer\%(RecursiveDir)%(Filename)%(Extension)</PackagePath>
       <PackageCopyToOutput>false</PackageCopyToOutput>
     </Content>
     <Content Include="..\models\PP-LCNet_x1_0_textline_ori_infer\**\*.*" Condition="Exists('..\models\PP-LCNet_x1_0_textline_ori_infer')">
