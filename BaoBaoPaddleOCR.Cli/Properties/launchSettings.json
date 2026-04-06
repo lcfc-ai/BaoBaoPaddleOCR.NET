@@ -1,0 +1,8 @@
+{
+  "profiles": {
+    "BaoBaoPaddleOCR.Cli": {
+      "commandName": "Project",
+      "commandLineArgs": "C:\\Users\\lsbao\\Desktop\\test.png --wechat"
+    }
+  }
+}

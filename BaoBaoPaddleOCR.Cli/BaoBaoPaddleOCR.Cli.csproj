@@ -1,14 +1,16 @@
-﻿<Project Sdk="Microsoft.NET.Sdk">
-
-  <ItemGroup>
-    <ProjectReference Include="..\BaoBaoPaddleOCR\BaoBaoPaddleOCR.csproj" />
-  </ItemGroup>
+<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
     <OutputType>Exe</OutputType>
     <TargetFramework>net8.0</TargetFramework>
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
+    <RestoreSources>$(RestoreSources);$(MSBuildThisFileDirectory)..\artifacts\local-feed</RestoreSources>
   </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="BaoBaoPaddleOCR.Net" Version="$(BaoBaoPaddleOcrVersion)" />
+    <PackageReference Include="System.Drawing.Common" Version="10.0.0-preview.3.25173.2" />
+  </ItemGroup>
 
 </Project>
