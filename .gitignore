@@ -13,6 +13,7 @@ BaoBaoPaddleOCR/runtimes/win-x64/native/
 deps/
 models/
 .model-downloads/
+paddle_inference/
 
 # Visual Studio
 .vs/

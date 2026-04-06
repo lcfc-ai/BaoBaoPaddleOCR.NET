@@ -16,6 +16,7 @@ public sealed class BaoBaoPaddleOcrClient : IBaoBaoPaddleOcrClient, IDisposable
 
     public BaoBaoPaddleOcrClient(string? modelRoot = null, string? nativeDir = null)
     {
+        ApplyModelDirectoryCompatibilityOverrides();
         NativeMethods.EnsureNativeLibraryLoaded(nativeDir);
 
         var resolvedModelRoot = ResolveModelRoot(modelRoot);
@@ -92,6 +93,23 @@ public sealed class BaoBaoPaddleOcrClient : IBaoBaoPaddleOcrClient, IDisposable
         }
 
         return Path.Combine(AppContext.BaseDirectory, "models");
+    }
+
+    private static void ApplyModelDirectoryCompatibilityOverrides()
+    {
+        SetEnvIfMissing("BAOBAO_PADDLEOCR_DET_DIRNAME", "PP-OCRv5_server_det_infer");
+        SetEnvIfMissing("BAOBAO_PADDLEOCR_REC_DIRNAME", "PP-OCRv5_server_rec_infer");
+        SetEnvIfMissing("BAOBAO_PADDLEOCR_CLS_DIRNAME", "PP-LCNet_x1_0_textline_ori_infer");
+    }
+
+    private static void SetEnvIfMissing(string name, string value)
+    {
+        if (!string.IsNullOrWhiteSpace(Environment.GetEnvironmentVariable(name)))
+        {
+            return;
+        }
+
+        Environment.SetEnvironmentVariable(name, value);
     }
 }
 

@@ -5,7 +5,7 @@
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
     <GeneratePackageOnBuild>false</GeneratePackageOnBuild>
-    <PackageId>BaoBao.PaddleOCR</PackageId>
+    <PackageId>BaoBaoPaddleOCR.Net</PackageId>
     <Version>0.1.0</Version>
     <Authors>BaoBao</Authors>
     <Company>BaoBao</Company>
@@ -27,7 +27,7 @@
 
   <ItemGroup>
     <None Include="..\README.md" Pack="true" PackagePath="\" Link="README.md" />
-    <None Include="buildTransitive\BaoBaoPaddleOCR.targets" Pack="true" PackagePath="buildTransitive\BaoBao.PaddleOCR.targets" />
+    <None Include="buildTransitive\BaoBaoPaddleOCR.targets" Pack="true" PackagePath="buildTransitive\BaoBaoPaddleOCR.Net.targets" />
     <None Include="buildTransitive\tools\SetupModels.ps1" Pack="true" PackagePath="buildTransitive\tools\SetupModels.ps1" />
   </ItemGroup>
 

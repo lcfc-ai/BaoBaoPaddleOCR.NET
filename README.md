@@ -28,7 +28,7 @@ BaoBaoPaddleOCR\bin\Release\net10.0\BaoBaoPaddleOCR.dll
 
 ### 2. 编译 `BaoBaoPaddleOCR.Native.dll`
 
-如果你要构建真实 OCR 原生层，还需要先准备这些依赖：
+如果你要构建真实 OCR 原生层，需要先准备这些依赖：
 
 - Visual Studio 2022 的 C++ 桌面开发工具
 - CMake
@@ -36,19 +36,25 @@ BaoBaoPaddleOCR\bin\Release\net10.0\BaoBaoPaddleOCR.dll
 - `paddle_inference`
 - PaddleOCR C++ 源码
 
-先准备依赖：
+第三方目录建议直接放在仓库根目录，也就是和这些目录同级：
 
-```powershell
-.\eng\setup-deps.ps1 -PaddleInferenceDir "D:\deps\paddle_inference" -Force
+```text
+BaoBaoPaddleOCR
+BaoBaoPaddleOCR.Cli
+BaoBaoPaddleOCR.Native
+eng
+PaddleOCR-3.4.0
+paddle_inference
 ```
 
-再编译原生层：
+准备好后，执行：
 
 ```powershell
 .\eng\build-native.ps1 `
   -Configuration Release `
   -WithPaddleOcr `
-  -PaddleInferenceDir .\deps\paddle_inference
+  -PaddleOcrSrcDir .\PaddleOCR-3.4.0 `
+  -PaddleInferenceDir .\paddle_inference
 ```
 
 生成结果会复制到：
@@ -56,6 +62,18 @@ BaoBaoPaddleOCR\bin\Release\net10.0\BaoBaoPaddleOCR.dll
 ```text
 BaoBaoPaddleOCR\runtimes\win-x64\native\BaoBaoPaddleOCR.Native.dll
 ```
+
+同时还会把依赖 DLL 一起复制到：
+
+```text
+BaoBaoPaddleOCR\runtimes\win-x64\native\
+```
+
+说明：
+
+- 推荐直接编 `Release native`
+- 如果你手上的 `paddle_inference` 是官方提供的 Windows 推理库，通常也是 Release 版
+- 这种情况下不要强行编 `Debug native`，否则容易出现 MSVC 运行时不匹配
 
 ### 3. 手动下载模型
 
@@ -78,20 +96,20 @@ models\PP-LCNet_x1_0_textline_ori_infer
 ### 1. 安装包
 
 ```powershell
-dotnet add package BaoBao.PaddleOCR
+dotnet add package BaoBaoPaddleOCR.Net
 ```
 
 或者在项目文件中引用：
 
 ```xml
 <ItemGroup>
-  <PackageReference Include="BaoBao.PaddleOCR" Version="0.1.3" />
+  <PackageReference Include="BaoBaoPaddleOCR.Net" Version="0.1.3" />
 </ItemGroup>
 ```
 
 ### 2. NuGet 包会自动做什么
 
-如果你通过 `NuGet` 使用 `BaoBao.PaddleOCR`：
+如果你通过 `NuGet` 使用 `BaoBaoPaddleOCR.Net`：
 
 - native runtimes 会跟随包进入输出目录
 - 模型会在消费者项目首次构建时自动下载到输出目录下的 `models\`

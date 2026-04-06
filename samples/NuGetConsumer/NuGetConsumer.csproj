@@ -9,7 +9,7 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="BaoBao.PaddleOCR" Version="0.1.1-local" />
+    <PackageReference Include="BaoBaoPaddleOCR.Net" Version="0.1.1-local" />
   </ItemGroup>
 
 </Project>
