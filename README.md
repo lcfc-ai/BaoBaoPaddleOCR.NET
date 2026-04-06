@@ -1,6 +1,14 @@
 # BaoBaoPaddleOCR.NET
 
+<<<<<<< HEAD
 `BaoBaoPaddleOCR.NET` 是一个面向 Windows x64 的 PaddleOCR .NET 封装，提供：
+=======
+`BaoBaoPaddleOCR.NET` 是一个面向 Windows 的 PaddleOCR .NET 封装。
+<img width="689" height="360" alt="test" src="https://github.com/user-attachments/assets/4bc6f3fd-8e4e-485a-ba58-fa37e21e14af" />
+
+<img width="1275" height="413" alt="image" src="https://github.com/user-attachments/assets/2ed976e8-bf51-4cf2-bb37-123d581e6366" />
+
+>>>>>>> 30cbb8cef698fa3fe3c6564a47f2a75bb6fd2468
 
 - `BaoBaoPaddleOCR.Net`：主库，包含 .NET API 和 native 运行时资源
 - `BaoBao.PaddleOCR.Models`：可选模型包，用于把默认模型随项目一起复制到输出目录
