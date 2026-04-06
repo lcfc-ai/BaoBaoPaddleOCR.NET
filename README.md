@@ -1,6 +1,10 @@
 # BaoBaoPaddleOCR.NET
 
 `BaoBaoPaddleOCR.NET` 是一个面向 Windows 的 PaddleOCR .NET 封装。
+<img width="689" height="360" alt="test" src="https://github.com/user-attachments/assets/4bc6f3fd-8e4e-485a-ba58-fa37e21e14af" />
+
+<img width="1275" height="413" alt="image" src="https://github.com/user-attachments/assets/2ed976e8-bf51-4cf2-bb37-123d581e6366" />
+
 
 当前默认使用：
 
