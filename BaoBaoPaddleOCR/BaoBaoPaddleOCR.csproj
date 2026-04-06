@@ -18,6 +18,10 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\..\BaoBao\BaoBao.Common\BaoBao.Common.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
     <None Include="runtimes\**\*.*" Exclude="runtimes\**\opencv_world*d.dll">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
       <Pack>true</Pack>

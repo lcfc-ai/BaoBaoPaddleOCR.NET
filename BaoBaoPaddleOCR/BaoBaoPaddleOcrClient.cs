@@ -1,12 +1,12 @@
 using System.Runtime.InteropServices;
 using System.Text;
-using System.Text.Json;
+using BaoBao.Common.Json;
 
 namespace BaoBaoPaddleOCR;
 
 public interface IBaoBaoPaddleOcrClient
 {
-    OcrResult Detect(string imagePath);
+    OcrResult Detect(string imagePath, bool includeColor = false);
 }
 
 public sealed class BaoBaoPaddleOcrClientOptions
@@ -78,7 +78,7 @@ public sealed class BaoBaoPaddleOcrClient : IBaoBaoPaddleOcrClient, IDisposable
 
     public static BaoBaoPaddleOcrClient Shared { get; } = new(new BaoBaoPaddleOcrClientOptions());
 
-    public OcrResult Detect(string imagePath)
+    public OcrResult Detect(string imagePath, bool includeColor = false)
     {
         ObjectDisposedException.ThrowIf(_disposed, this);
 
@@ -107,7 +107,7 @@ public sealed class BaoBaoPaddleOcrClient : IBaoBaoPaddleOcrClient, IDisposable
             throw new InvalidOperationException("OCR returned an empty JSON payload.");
         }
 
-        return OcrResultParser.Parse(json);
+        return OcrResultParser.Parse(json, includeColor);
     }
 
     public void Dispose()
@@ -162,25 +162,52 @@ public sealed class BaoBaoPaddleOcrClient : IBaoBaoPaddleOcrClient, IDisposable
 
 internal static class OcrResultParser
 {
-    private static readonly JsonSerializerOptions JsonOptions = new()
+    public static OcrResult Parse(string json, bool includeColor)
     {
-        PropertyNameCaseInsensitive = true
-    };
-
-    public static OcrResult Parse(string json)
-    {
-        var dto = JsonSerializer.Deserialize<NativeOcrResultDto>(json, JsonOptions)
+        var dto = JsonKit.Deserialize<NativeOcrResultDto>(json)
                   ?? throw new InvalidOperationException("Failed to deserialize OCR JSON result.");
 
         var blocks = dto.Blocks is null
             ? Array.Empty<OcrBlock>()
-            : dto.Blocks.Select(x => new OcrBlock(x.Text ?? string.Empty, x.Score)).ToArray();
+            : dto.Blocks.Select(static x => new OcrBlock(
+                x.Text ?? string.Empty,
+                x.Score,
+                x.Box is null
+                    ? Array.Empty<OcrPoint>()
+                    : x.Box
+                        .Where(static point => point.Length >= 2)
+                        .Select(static point => new OcrPoint(point[0], point[1]))
+                        .ToArray(),
+                TryParseNativeColorSample(x)))
+                .ToArray();
+
+        if (!includeColor)
+        {
+            blocks = blocks.Select(static block => block with { ColorSample = null }).ToArray();
+        }
 
         var text = string.IsNullOrWhiteSpace(dto.Text)
             ? string.Join(Environment.NewLine, blocks.Select(x => x.Text).Where(x => !string.IsNullOrWhiteSpace(x)))
             : dto.Text;
 
         return new OcrResult(text, json, blocks);
+    }
+
+    private static OcrColorSample? TryParseNativeColorSample(NativeOcrBlockDto dto)
+    {
+        if (dto.SampleRgb is not { Length: >= 3 })
+        {
+            return null;
+        }
+
+        var red = dto.SampleRgb[0];
+        var green = dto.SampleRgb[1];
+        var blue = dto.SampleRgb[2];
+        var variance = dto.SampleVariance ?? 0f;
+        var hex = string.IsNullOrWhiteSpace(dto.SampleColorHex)
+            ? $"#{(int)Math.Clamp(Math.Round(red), 0, 255):X2}{(int)Math.Clamp(Math.Round(green), 0, 255):X2}{(int)Math.Clamp(Math.Round(blue), 0, 255):X2}"
+            : dto.SampleColorHex!;
+        return new OcrColorSample(hex, red, green, blue, variance);
     }
 }
 
@@ -196,6 +223,14 @@ internal sealed class NativeOcrBlockDto
     public string? Text { get; set; }
 
     public float Score { get; set; }
+
+    public float[][]? Box { get; set; }
+
+    public string? SampleColorHex { get; set; }
+
+    public float[]? SampleRgb { get; set; }
+
+    public float? SampleVariance { get; set; }
 }
 
 internal static partial class NativeMethods
