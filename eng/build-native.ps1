@@ -185,7 +185,7 @@ $scriptDir = Split-Path -Parent $MyInvocation.MyCommand.Path
 $repoRoot = Split-Path -Parent $scriptDir
 $nativeSrcDir = Join-Path $repoRoot "BaoBaoPaddleOCR.Native"
 $buildDir = Join-Path $nativeSrcDir "build-$buildDirSuffix"
-$cliBinNativeDir = Join-Path $repoRoot "BaoBaoPaddleOCR.Cli\bin\$Configuration\net10.0\native"
+$cliBinNativeDir = Join-Path $repoRoot "BaoBaoPaddleOCR.Cli\bin\$Configuration\net8.0\native"
 $runtimeNativeDir = Join-Path $repoRoot "BaoBaoPaddleOCR\runtimes\$TargetArch\native"
 $depsRootDir = Join-Path $repoRoot "deps"
 

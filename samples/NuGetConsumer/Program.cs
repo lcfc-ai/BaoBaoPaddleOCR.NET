@@ -7,7 +7,7 @@ if (args.Length == 0)
 }
 
 var imagePath = Path.GetFullPath(args[0]);
-using var client = new BaoBaoPaddleOcrClient();
+using var client = new BaoBaoPaddleOcrClient(new BaoBaoPaddleOcrClientOptions());
 var result = client.Detect(imagePath);
 
 Console.WriteLine(result.Text);

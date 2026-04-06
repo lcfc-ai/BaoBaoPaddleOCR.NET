@@ -12,6 +12,10 @@ function Resolve-TargetPath {
     )
 
     $candidate = if ([string]::IsNullOrWhiteSpace($Value)) { $Fallback } else { $Value }
+    $candidate = $candidate.Trim().Trim('"')
+    if ($candidate.Length -gt 3) {
+        $candidate = $candidate.TrimEnd('\', '/')
+    }
     return [System.IO.Path]::GetFullPath($candidate)
 }
 

@@ -1,0 +1,5 @@
+<Project>
+  <PropertyGroup>
+    <BaoBaoPaddleOcrVersion>0.1.4</BaoBaoPaddleOcrVersion>
+  </PropertyGroup>
+</Project>
